@@ -11,7 +11,9 @@ export const AppDataSource = new DataSource({
   logging: process.env.NODE_ENV === 'development',
   entities: [Entry],
   migrations: ['src/migrations/**/*.ts'],
-  ssl: {
-    rejectUnauthorized: false, // Required for Supabase
+  extra: {
+    ssl: {
+      rejectUnauthorized: false, // ✅ Fix for Supabase + TypeORM 0.3.x
+    },
   },
 });
