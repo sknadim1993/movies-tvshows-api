@@ -411,11 +411,17 @@ The API returns consistent error responses:
 📝 Validation Rules
 
 title: Required, 1-255 characters
+
 type: Required, must be "Movie" or "TV Show"
+
 director: Required, 1-255 characters
+
 budget: Required, positive number
+
 location: Required, 1-255 characters
+
 duration: Required, positive integer (minutes)
+
 year: Required, integer between 1800 and current year + 10
 
 👨‍💻 Author
