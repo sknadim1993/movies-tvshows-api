@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppDataSource } from '../config/database';
 import { Entry } from '../entities/Entry';
 import { AppError } from '../middlewares/errorHandler';
-import { Like } from 'typeorm';
+import { ILike } from 'typeorm';
 
 const entryRepository = AppDataSource.getRepository(Entry);
 
@@ -169,7 +169,7 @@ export const searchEntries = async (
 
     const [entries, total] = await entryRepository.findAndCount({
       where: {
-        title: Like(`%${title}%`),
+        title: ILike(`%${title}%`),
       },
       skip,
       take: limit,
