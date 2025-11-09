@@ -74,9 +74,9 @@ cp .env.example .env
 Edit the `.env` file and add your Supabase PostgreSQL connection string:
 
 ```env
-DATABASE_URL=postgresql://postgres.nrcnnuockdyvncunuxym:[YOUR-PASSWORD]@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres
+DATABASE_URL=postgresql://postgres:[YOUR_PASSWORD]@db.nrcnnuockdyvncunuxym.supabase.co:5432/postgres
 PORT=3000
-NODE_ENV=development
+NODE_ENV=production
 ```
 
 Important: Replace `[YOUR-PASSWORD]` with your actual Supabase database password.
