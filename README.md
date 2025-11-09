@@ -1,21 +1,21 @@
-🎬 Movies & TV Shows API
+ Movies & TV Shows API
 
 A RESTful backend service built with Node.js, Express, TypeScript, and PostgreSQL that allows users to manage their favorite movies and TV shows.
 
- 📋 Table of Contents
+ Table of Contents
 
-[Features](#features)
-[Tech Stack](#tech-stack)
-[Prerequisites](#prerequisites)
-[Installation](#installation)
-[Database Setup](#database-setup)
-[Running the Application](#running-the-application)
-[API Endpoints](#api-endpoints)
-[Database Schema](#database-schema)
-[Sample Data](#sample-data)
-[Project Structure](#project-structure)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Database Setup](#database-setup)
+- [Running the Application](#running-the-application)
+- [API Endpoints](#api-endpoints)
+- [Database Schema](#database-schema)
+- [Sample Data](#sample-data)
+- [Project Structure](#project-structure)
 
- ✨ Features
+ Features
 
 ✅ Create new movie/TV show entries
 ✅ List all entries with pagination
@@ -27,20 +27,20 @@ A RESTful backend service built with Node.js, Express, TypeScript, and PostgreSQ
 ✅ Comprehensive error handling
 ✅ Cloud-hosted database (Supabase)
 
- 🛠 Tech Stack
+ Tech Stack
 
-Backend Framework: Node.js with Express
-Language: TypeScript
-Database: PostgreSQL (Supabase)
-ORM: TypeORM
-Validation: Zod
-Other Libraries: 
+Backend Framework: Node.js with Express  
+Language: TypeScript  
+Database: PostgreSQL (Supabase)  
+ORM: TypeORM  
+Validation: Zod  
+Other Libraries:
   - Helmet (Security)
   - CORS (Cross-Origin Resource Sharing)
   - Morgan (Logging)
   - Dotenv (Environment Variables)
 
- 📦 Prerequisites
+ Prerequisites
 
 Before you begin, ensure you have the following installed:
 
@@ -48,17 +48,15 @@ Before you begin, ensure you have the following installed:
 - npm or yarn
 - Git
 
- 🚀 Installation
+ Installation
 
  1. Clone the Repository
-
 ```bash
 git clone https://github.com/sknadim1993/movies-tvshows-api.git
 cd movies-tvshows-api
 ```
 
  2. Install Dependencies
-
 ```bash
 npm install
 ```
@@ -66,22 +64,20 @@ npm install
  3. Environment Configuration
 
 Create a `.env` file in the root directory:
-
 ```bash
 cp .env.example .env
 ```
 
 Edit the `.env` file and add your Supabase PostgreSQL connection string:
-
 ```env
 DATABASE_URL=postgresql://postgres:[YOUR_PASSWORD]@db.nrcnnuockdyvncunuxym.supabase.co:5432/postgres
 PORT=3000
 NODE_ENV=production
 ```
 
-Important: Replace `[YOUR-PASSWORD]` with your actual Supabase database password.
+Important: Replace `[YOUR_PASSWORD]` with your actual Supabase database password.
 
- 🗄️ Database Setup
+ Database Setup
 
  Database Schema
 
@@ -100,14 +96,34 @@ The application uses a single `entries` table with the following structure:
 | createdAt | TIMESTAMP | Auto-generated timestamp |
 | updatedAt | TIMESTAMP | Auto-updated timestamp |
 
- Initialize Database
+ Database Initialization
 
-The application uses TypeORM with `synchronize: true`, which automatically creates tables on startup. However, for production, you should use migrations.
+The application uses TypeORM with `synchronize: true` in development mode, which automatically creates tables when the server starts for the first time. No manual schema creation is needed.
+
+How it works:
+1. When you run `npm run dev` or `npm start`, TypeORM reads the `Entry` entity
+2. It automatically creates the `entries` table with all columns and constraints
+3. The database is ready to use immediately
+
+ Migration Instructions (Production)
+
+For production environments, it's recommended to use TypeORM migrations instead of auto-synchronization:
+
+Generate a migration:
+```bash
+npm run migration:generate -- -n CreateEntryTable
+```
+
+Run migrations:
+```bash
+npm run migration:run
+```
+
+Note: For this development exercise, migrations are optional as `synchronize: true` handles schema creation automatically.
 
  Seed Sample Data
 
 Populate the database with sample data (3 movies + 3 TV shows):
-
 ```bash
 npm run seed
 ```
@@ -124,10 +140,9 @@ TV Shows:
 2. Game of Thrones (2011) - David Benioff & D.B. Weiss
 3. Stranger Things (2016) - The Duffer Brothers
 
- 🏃 Running the Application
+ Running the Application
 
  Development Mode
-
 ```bash
 npm run dev
 ```
@@ -135,7 +150,6 @@ npm run dev
 The server will start on `http://localhost:3000` with hot-reloading enabled.
 
  Production Mode
-
 ```bash
 npm run build
 npm start
@@ -145,7 +159,16 @@ npm start
 
 Visit `http://localhost:3000/health` to verify the server is running.
 
- 📡 API Endpoints
+Expected response:
+```json
+{
+  "success": true,
+  "message": "Server is running",
+  "timestamp": "2025-11-09T12:00:00.000Z"
+}
+```
+
+ API Endpoints
 
  Base URL
 ```
@@ -294,7 +317,7 @@ Response (200):
 GET `/api/entries/search?title=inception&page=1&limit=10`
 
 Query Parameters:
-- `title` (required) - Search query
+- `title` (required) - Search query (case-insensitive)
 - `page` (optional, default: 1)
 - `limit` (optional, default: 10)
 
@@ -328,8 +351,7 @@ Response (200):
 }
 ```
 
- 🏗️ Project Structure
-
+ Project Structure
 ```
 movies-tvshows-api/
 ├── src/
@@ -350,19 +372,19 @@ movies-tvshows-api/
 │   │   └── entryValidators.ts   # Zod schemas
 │   ├── app.ts                   # Express app setup
 │   └── server.ts                # Server entry point
-├── .env                 # Environment template
+├── .env.example                 # Environment template
 ├── .gitignore                   # Git ignore rules
 ├── package.json                 # Dependencies
 ├── tsconfig.json                # TypeScript config
 └── README.md                    # Documentation
 ```
 
- 🧪 Testing the API
+ Testing the API
 
 You can test the API using tools like:
-Postman: Import the endpoints and test
-cURL: Command-line testing
-Thunder Client: VS Code extension
+- Postman: Import the endpoints and test
+- cURL: Command-line testing
+- Thunder Client: VS Code extension
 
  Example cURL Commands
 
@@ -391,10 +413,21 @@ Search entries:
 curl "http://localhost:3000/api/entries/search?title=inception"
 ```
 
-🔒 Error Handling
+Update entry:
+```bash
+curl -X PUT http://localhost:3000/api/entries/YOUR_ENTRY_ID \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Updated Title"}'
+```
+
+Delete entry:
+```bash
+curl -X DELETE http://localhost:3000/api/entries/YOUR_ENTRY_ID
+```
+
+ Error Handling
 
 The API returns consistent error responses:
-
 ```json
 {
   "success": false,
@@ -408,33 +441,58 @@ The API returns consistent error responses:
 }
 ```
 
-📝 Validation Rules
+Common HTTP Status Codes:
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request (Validation Error)
+- `404` - Not Found
+- `500` - Internal Server Error
 
-title: Required, 1-255 characters
+ Validation Rules
 
-type: Required, must be "Movie" or "TV Show"
+- title: Required, 1-255 characters
+- type: Required, must be "Movie" or "TV Show"
+- director: Required, 1-255 characters
+- budget: Required, positive number
+- location: Required, 1-255 characters
+- duration: Required, positive integer (minutes)
+- year: Required, integer between 1800 and current year + 10
 
-director: Required, 1-255 characters
+ Code Quality & Best Practices
 
-budget: Required, positive number
+This project follows modern development best practices:
 
-location: Required, 1-255 characters
+✅ TypeScript - Full type safety throughout the application  
+✅ Clean Architecture - Separation of concerns (controllers, routes, entities)  
+✅ Input Validation - Zod schemas for robust data validation  
+✅ Error Handling - Custom error classes and middleware  
+✅ Security - Helmet for HTTP headers, CORS enabled  
+✅ Logging - Morgan for request logging  
+✅ Environment Configuration - dotenv for sensitive data  
+✅ Database Abstraction - TypeORM for database operations  
+✅ Cloud Database - Production-ready Supabase PostgreSQL  
 
-duration: Required, positive integer (minutes)
-
-year: Required, integer between 1800 and current year + 10
-
-👨‍💻 Author
+ Author
 
 Sheikh Nadim
-- GitHub: [@sknadim1993](https://github.com/sknadim1993)
+ GitHub: [@sknadim1993](https://github.com/sknadim1993)
+ Email: smnadim.gov@gmail.com
 
-📄 License
+ License
 
 This project is licensed under the MIT License.
 
-🙏 Acknowledgments
+ Acknowledgments
 
-- Built for LOGICALL INC Backend Developer Coding Exercise
-- Powered by Supabase PostgreSQL
-- TypeScript + Express + TypeORM stack
+Built for LOGICALL INC Backend Developer Coding Exercise
+Powered by Supabase PostgreSQL
+TypeScript + Express + TypeORM stack
+
+---
+
+Note: This is a development project. For production deployment, consider:
+- Using migrations instead of `synchronize: true`
+- Implementing authentication and authorization
+- Adding rate limiting
+- Setting up CI/CD pipelines
+- Implementing comprehensive testing (unit & integration tests)
