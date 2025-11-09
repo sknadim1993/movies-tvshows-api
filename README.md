@@ -350,7 +350,7 @@ movies-tvshows-api/
 │   │   └── entryValidators.ts   # Zod schemas
 │   ├── app.ts                   # Express app setup
 │   └── server.ts                # Server entry point
-├── .env.example                 # Environment template
+├── .env                 # Environment template
 ├── .gitignore                   # Git ignore rules
 ├── package.json                 # Dependencies
 ├── tsconfig.json                # TypeScript config
