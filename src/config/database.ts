@@ -15,13 +15,8 @@ export const AppDataSource = new DataSource({
     rejectUnauthorized: false,
   },
   extra: {
-    // Increase connection timeout
-    connectionTimeoutMillis: 30000, // 30 seconds
-    query_timeout: 30000,
-    statement_timeout: 30000,
-    // Connection pool settings
-    max: 20,
+    max: 10,
+    connectionTimeoutMillis: 10000,  // Only once!
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
   },
 });
