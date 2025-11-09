@@ -9,7 +9,6 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.isOperational = true;
 
-    // Maintain proper stack trace (only in V8)
     Error.captureStackTrace?.(this, this.constructor);
   }
 }
@@ -23,7 +22,7 @@ export const errorHandler = (
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 
-  // Log errors only in development
+  // Log errors in development
   if (process.env.NODE_ENV === 'development') {
     console.error('🔥 ERROR:', err);
   }
@@ -31,6 +30,7 @@ export const errorHandler = (
   res.status(statusCode).json({
     success: false,
     message,
+    // Only show stack in development
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
@@ -39,3 +39,8 @@ export const notFound = (req: Request, res: Response, next: NextFunction) => {
   const error = new AppError(`Route ${req.originalUrl} not found`, 404);
   next(error);
 };
+```
+
+**For production deployment, also add to `.env`:**
+```
+NODE_ENV=production
