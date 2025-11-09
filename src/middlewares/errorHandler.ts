@@ -9,7 +9,8 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.isOperational = true;
 
-    Error.captureStackTrace(this, this.constructor);
+    // Maintain proper stack trace (only in V8)
+    Error.captureStackTrace?.(this, this.constructor);
   }
 }
 
@@ -19,16 +20,17 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  err.statusCode = err.statusCode || 500;
-  err.message = err.message || 'Internal Server Error';
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
 
+  // Log errors only in development
   if (process.env.NODE_ENV === 'development') {
-    console.error('ERROR:', err);
+    console.error('🔥 ERROR:', err);
   }
 
-  res.status(err.statusCode).json({
+  res.status(statusCode).json({
     success: false,
-    message: err.message,
+    message,
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
