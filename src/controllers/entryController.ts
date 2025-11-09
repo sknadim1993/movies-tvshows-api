@@ -35,7 +35,8 @@ export const getAllEntries = async (
   next: NextFunction
 ) => {
   try {
-    const { page, limit } = req.query as any;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
     const skip = (page - 1) * limit;
 
@@ -161,7 +162,8 @@ export const searchEntries = async (
 ) => {
   try {
     const { title } = req.query;
-    const { page = 1, limit = 10 } = req.query as any;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
     const skip = (page - 1) * limit;
 
