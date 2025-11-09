@@ -30,7 +30,6 @@ export const errorHandler = (
   res.status(statusCode).json({
     success: false,
     message,
-    // Only show stack in development
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
@@ -39,8 +38,3 @@ export const notFound = (req: Request, res: Response, next: NextFunction) => {
   const error = new AppError(`Route ${req.originalUrl} not found`, 404);
   next(error);
 };
-```
-
-**For production deployment, also add to `.env`:**
-```
-NODE_ENV=production
