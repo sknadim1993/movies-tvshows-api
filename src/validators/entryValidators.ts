@@ -1,199 +1,104 @@
-import { Request, Response, NextFunction } from 'express';
-import { AppDataSource } from '../config/database';
-import { Entry } from '../entities/Entry';
-import { AppError } from '../middlewares/errorHandler';
-import { ILike } from 'typeorm';
+import { z } from 'zod';
 
-const entryRepository = AppDataSource.getRepository(Entry);
+export const EntryTypeEnum = z.enum(['Movie', 'TV Show']);
 
-// Create a new entry
-export const createEntry = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const entryData = req.body;
+export const createEntrySchema = z.object({
+  title: z.string().min(1, 'Title is required').max(255, 'Title is too long'),
+  type: EntryTypeEnum,
+  director: z
+    .string()
+    .min(1, 'Director is required')
+    .max(255, 'Director name is too long'),
+  budget: z
+    .number()
+    .positive('Budget must be a positive number')
+    .or(z.string().transform((val) => parseFloat(val))),
+  location: z
+    .string()
+    .min(1, 'Location is required')
+    .max(255, 'Location is too long'),
+  duration: z
+    .number()
+    .int('Duration must be an integer')
+    .positive('Duration must be positive')
+    .or(z.string().transform((val) => parseInt(val, 10))),
+  year: z
+    .number()
+    .int('Year must be an integer')
+    .min(1800, 'Year must be after 1800')
+    .max(new Date().getFullYear() + 10, 'Year cannot be too far in the future')
+    .or(z.string().transform((val) => parseInt(val, 10))),
+});
 
-    const newEntry = entryRepository.create(entryData);
-    const savedEntry = await entryRepository.save(newEntry);
+export const updateEntrySchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(255, 'Title is too long')
+    .optional(),
+  type: EntryTypeEnum.optional(),
+  director: z
+    .string()
+    .min(1, 'Director is required')
+    .max(255, 'Director name is too long')
+    .optional(),
+  budget: z
+    .number()
+    .positive('Budget must be a positive number')
+    .or(z.string().transform((val) => parseFloat(val)))
+    .optional(),
+  location: z
+    .string()
+    .min(1, 'Location is required')
+    .max(255, 'Location is too long')
+    .optional(),
+  duration: z
+    .number()
+    .int('Duration must be an integer')
+    .positive('Duration must be positive')
+    .or(z.string().transform((val) => parseInt(val, 10)))
+    .optional(),
+  year: z
+    .number()
+    .int('Year must be an integer')
+    .min(1800, 'Year must be after 1800')
+    .max(new Date().getFullYear() + 10, 'Year cannot be too far in the future')
+    .or(z.string().transform((val) => parseInt(val, 10)))
+    .optional(),
+});
 
-    res.status(201).json({
-      success: true,
-      message: 'Entry created successfully',
-      data: savedEntry,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+export const paginationSchema = z.object({
+  page: z
+    .string()
+    .optional()
+    .default('1')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val > 0, 'Page must be greater than 0'),
+  limit: z
+    .string()
+    .optional()
+    .default('10')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val > 0 && val <= 100, 'Limit must be between 1 and 100'),
+});
 
-// Get all entries with pagination
-export const getAllEntries = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+export const searchSchema = z.object({
+  title: z.string().min(1, 'Search query is required'),
+  page: z
+    .string()
+    .optional()
+    .default('1')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val > 0, 'Page must be greater than 0'),
+  limit: z
+    .string()
+    .optional()
+    .default('10')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val > 0 && val <= 100, 'Limit must be between 1 and 100'),
+});
 
-    const skip = (page - 1) * limit;
-
-    const [entries, total] = await entryRepository.findAndCount({
-      skip,
-      take: limit,
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    res.status(200).json({
-      success: true,
-      message: 'Entries retrieved successfully',
-      data: entries,
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalItems: total,
-        itemsPerPage: limit,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Get entry by ID
-export const getEntryById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-
-    const entry = await entryRepository.findOne({
-      where: { id },
-    });
-
-    if (!entry) {
-      throw new AppError('Entry not found', 404);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Entry retrieved successfully',
-      data: entry,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Update entry
-export const updateEntry = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
-
-    const entry = await entryRepository.findOne({
-      where: { id },
-    });
-
-    if (!entry) {
-      throw new AppError('Entry not found', 404);
-    }
-
-    Object.assign(entry, updateData);
-    const updatedEntry = await entryRepository.save(entry);
-
-    res.status(200).json({
-      success: true,
-      message: 'Entry updated successfully',
-      data: updatedEntry,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Delete entry
-export const deleteEntry = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-
-    const entry = await entryRepository.findOne({
-      where: { id },
-    });
-
-    if (!entry) {
-      throw new AppError('Entry not found', 404);
-    }
-
-    await entryRepository.remove(entry);
-
-    res.status(200).json({
-      success: true,
-      message: 'Entry deleted successfully',
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Search entries by title (Bonus feature)
-export const searchEntries = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { title } = req.query;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-
-    const skip = (page - 1) * limit;
-
-    const [entries, total] = await entryRepository.findAndCount({
-      where: {
-        title: ILike(`%${title}%`),
-      },
-      skip,
-      take: limit,
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    res.status(200).json({
-      success: true,
-      message: 'Search results retrieved successfully',
-      data: entries,
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalItems: total,
-        itemsPerPage: limit,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+export type CreateEntryInput = z.infer<typeof createEntrySchema>;
+export type UpdateEntryInput = z.infer<typeof updateEntrySchema>;
+export type PaginationInput = z.infer<typeof paginationSchema>;
+export type SearchInput = z.infer<typeof searchSchema>;
